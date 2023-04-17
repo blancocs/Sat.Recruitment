@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace Sat.Recruitment.Api.Controllers
@@ -16,7 +17,8 @@ namespace Sat.Recruitment.Api.Controllers
 
     [ApiController]
     [Route("[controller]")]
-    public partial class UsersController : ControllerBase
+    [ApiVersion("1.0")]
+    public class UsersController : ControllerBase
     {
 
         private readonly List<User> _users = new List<User>();
@@ -25,12 +27,12 @@ namespace Sat.Recruitment.Api.Controllers
         }
 
         [HttpPost]
-        [Route("/create-user")]
-        public async Task<Result> CreateUser(string name, string email, string address, string phone, string userType, string money)
+        [Route("/create-user")] //corregir ruta.
+        public async Task<Result> CreateUser(string name, string email, string address, string phone, string userType, string money) //reciba un DTO.
         {
             var errors = "";
 
-            ValidateErrors(name, email, address, phone, ref errors);
+            ValidateErrors(name, email, address, phone, ref errors); //fluent validation o data anotation.
 
             if (errors != null && errors != "")
                 return new Result()
@@ -189,7 +191,19 @@ namespace Sat.Recruitment.Api.Controllers
                 //Validate if Phone is null
                 errors = errors + " The phone is required";
         }
+
+        private StreamReader ReadUsersFromFile()
+        {
+            var path = Directory.GetCurrentDirectory() + "/Files/Users.txt";
+
+            FileStream fileStream = new FileStream(path, FileMode.Open);
+
+            StreamReader reader = new StreamReader(fileStream);
+            return reader;
+        }
     }
+
+    
     public class User
     {
         public string Name { get; set; }
